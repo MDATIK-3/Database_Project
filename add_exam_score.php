@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($result_max_marks->num_rows > 0) {
         $row = $result_max_marks->fetch_assoc();
         $max_marks = $row['Max_Marks'];
-        
+
         // Step 2: Validate Marks_Obtained against Max_Marks
         if ($marks_obtained <= $max_marks) {
             // Step 3: Insert into Exam_Scores table
@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                            VALUES (?, ?, ?)";
             $stmt_insert = $conn->prepare($sql_insert);
             $stmt_insert->bind_param("iii", $exam_id, $student_id, $marks_obtained);
-            
+
             if ($stmt_insert->execute()) {
                 header("Location: exam_scores.php");
                 exit();
@@ -43,17 +43,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Exam Score</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
+
 <body>
     <div class="container">
         <h1 class="mt-5">Add Exam Score</h1>
         <a href="exam_scores.php" class="btn btn-primary mb-3">Back to Exam Scores</a>
-        
+
         <form method="POST" action="add_exam_score.php">
             <div class="form-group">
                 <label for="exam_id">Exam ID</label>
@@ -71,6 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </form>
     </div>
 </body>
+
 </html>
 
 <?php $conn->close(); ?>

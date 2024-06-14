@@ -1,0 +1,153 @@
+Table Administrator {
+    Admin_ID INT [pk, increment]
+    Admin_Name VARCHAR(100) [not null]
+    Password VARCHAR(50) [not null]
+    Email VARCHAR(100) [unique, not null]
+    Contact_No VARCHAR(15)
+    Date_Joined DATE
+}
+
+Table Department {
+    Dept_ID INT [pk, increment]
+    Department_Name VARCHAR(100) [not null, unique]
+    HOD VARCHAR(100) [not null]
+}
+
+Table Course {
+    Course_ID INT [pk, increment]
+    C_Name VARCHAR(100) [not null]
+    Description TEXT
+    Credits DECIMAL(4, 2) [not null]
+    Dept_ID INT
+}
+
+Table Student {
+    Student_ID INT [pk, increment]
+    S_Name VARCHAR(100) [not null]
+    Address VARCHAR(255)
+    Contact_No VARCHAR(15)
+    Date_of_Birth DATE
+    Gender ENUM('Male', 'Female', 'Other')
+    Email VARCHAR(100) [unique]
+    Guardian_Name VARCHAR(100)
+    Guardian_Contact_No VARCHAR(15)
+    Enrollment_Date DATE [not null]
+}
+
+Table Fees {
+    Receipt_No INT [pk, increment]
+    Amount DECIMAL(10, 2) [not null]
+    Date_of_Receipt DATE [not null]
+    Student_ID INT
+}
+
+Table Exams {
+    Exam_ID INT [pk, increment]
+    Course_ID INT
+    Exam_Date DATE
+    Max_Marks INT
+}
+
+Table Exam_Scores {
+    Score_ID INT [pk, increment]
+    Exam_ID INT
+    Student_ID INT
+    Marks_Obtained INT
+}
+
+Table Attendance {
+    Attendance_ID INT [pk, increment]
+    Date DATE
+    Student_ID INT
+    Status ENUM('Present', 'Absent', 'Late', 'Excused')
+}
+
+Table Library {
+    Book_ID INT [pk, increment]
+    Title VARCHAR(255) [not null]
+    Author VARCHAR(100)
+    Quantity INT
+    Available INT
+}
+
+Table Borrowed_Books {
+    Borrow_ID INT [pk, increment]
+    Student_ID INT
+    Book_ID INT
+    Borrow_Date DATE
+    Due_Date DATE
+    Return_Date DATE
+    Late_Fee DECIMAL(5, 2)
+}
+
+Table Enrollment {
+    Student_ID INT
+    Course_ID INT
+    Enrollment_Date DATE
+  
+}
+
+Table Conducts {
+    Dept_ID INT
+    Exam_ID INT
+
+}
+
+Table Adds {
+    Admin_ID INT
+    Student_ID INT
+    Date_Added DATE
+
+}
+
+Table Enters {
+    Admin_ID INT
+    Course_ID INT
+    Date_Entered DATE
+
+}
+
+Table Manages {
+    Admin_ID INT
+    Dept_ID INT
+    Date_Assigned DATE
+   
+}
+
+Table Class_Schedule {
+    Schedule_ID INT [pk, increment]
+    Course_ID INT
+    Day ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday') [not null]
+    Start_Time TIME [not null]
+    End_Time TIME [not null]
+    Room_No VARCHAR(50)
+}
+
+Ref: Course.Dept_ID > Department.Dept_ID
+
+Ref: Student.Student_ID > Fees.Student_ID
+Ref: Student.Student_ID > Exam_Scores.Student_ID
+Ref: Student.Student_ID > Attendance.Student_ID
+Ref: Student.Student_ID > Borrowed_Books.Student_ID
+Ref: Student.Student_ID > Enrollment.Student_ID
+Ref: Student.Student_ID > Adds.Student_ID
+
+Ref: Exams.Course_ID > Course.Course_ID
+Ref: Exam_Scores.Exam_ID > Exams.Exam_ID
+
+Ref: Borrowed_Books.Book_ID > Library.Book_ID
+
+Ref: Enrollment.Course_ID > Course.Course_ID
+
+Ref: Conducts.Dept_ID > Department.Dept_ID
+Ref: Conducts.Exam_ID > Exams.Exam_ID
+
+Ref: Adds.Admin_ID > Administrator.Admin_ID
+Ref: Enters.Admin_ID > Administrator.Admin_ID
+Ref: Enters.Course_ID > Course.Course_ID
+Ref: Manages.Admin_ID > Administrator.Admin_ID
+Ref: Manages.Dept_ID > Department.Dept_ID
+
+Ref: Class_Schedule.Course_ID > Course.Course_ID
+
+Ref: "Administrator"."Password" < "Administrator"."Admin_ID"
