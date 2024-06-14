@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Role - Student Management System</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url('https://wallpapercave.com/wp/wp2552690.jpg');
+            background-size: cover;
+            background-position: center;
+            animation: fadeIn 1.5s ease-in-out;
+            margin: 0;
+            overflow: hidden;
+        }
+        .overlay {
+            background-color: rgba(0, 0, 0, 0.6);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            text-align: center;
+            animation: slideDown 1.5s ease-in-out;
+            color: white;
+            z-index: 1;
+        }
+        .btn {
+            margin: 10px;
+            width: 200px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+        }
+        .typewriter-text {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 0.15em solid orange;
+            animation: typing 3s steps(40, end), blink-caret 0.75s step-end infinite;
+            font-size: 2rem;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-50px); }
+            to { transform: translateY(0); }
+        }
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 60%; }
+        }
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: orange; }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay">
+        <div class="container">
+            <h1 class="mb-5">
+                <span class="typewriter-text" >Welcome to Student Management System</span>
+            </h1>
+            <h2 class="mb-4">Please select your role:</h2>
+            <a href="login.php" class="btn btn-primary btn-lg">Administrator</a>
+            <a href="student_login.php" class="btn btn-secondary btn-lg">Student</a>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                button.addEventListener('mouseover', function() {
+                    this.classList.add('shadow-lg');
+                });
+                button.addEventListener('mouseout', function() {
+                    this.classList.remove('shadow-lg');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

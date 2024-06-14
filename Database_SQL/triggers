@@ -1,0 +1,199 @@
+-- 1. Auto-Update Available Quantity in Library Table After Borrowing a Book
+DELIMITER $$
+
+CREATE TRIGGER after_borrow_book
+AFTER INSERT ON Borrowed_Books
+FOR EACH ROW
+BEGIN
+    UPDATE Library
+    SET Available = Available - 1
+    WHERE Book_ID = NEW.Book_ID;
+END $$
+
+DELIMITER ;
+
+-- 2. Auto-Update Available Quantity in Library Table After Returning a Book
+DELIMITER $$
+
+CREATE TRIGGER after_return_book
+AFTER UPDATE ON Borrowed_Books
+FOR EACH ROW
+BEGIN
+    IF NEW.Return_Date IS NOT NULL THEN
+        UPDATE Library
+        SET Available = Available + 1
+        WHERE Book_ID = NEW.Book_ID;
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- 3. Enforce Unique Enrollment for Students in Courses
+DELIMITER $$
+
+CREATE TRIGGER before_enroll
+BEFORE INSERT ON Enrollment
+FOR EACH ROW
+BEGIN
+    DECLARE enrollment_count INT;
+
+    SELECT COUNT(*) INTO enrollment_count
+    FROM Enrollment
+    WHERE Student_ID = NEW.Student_ID AND Course_ID = NEW.Course_ID;
+
+    IF enrollment_count > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Student already enrolled in this course';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- 4. Auto-Update Available Quantity on Library Table After Adding Books
+DELIMITER $$
+
+CREATE TRIGGER before_insert_library
+BEFORE INSERT ON Library
+FOR EACH ROW
+BEGIN
+    SET NEW.Available = NEW.Quantity;
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE TRIGGER before_update_library
+BEFORE UPDATE ON Library
+FOR EACH ROW
+BEGIN
+    SET NEW.Available = NEW.Quantity;
+END $$
+
+DELIMITER ;
+
+-- 5. Auto-Calculate and Update Late Fee on Return of a Book
+DELIMITER $$
+
+CREATE TRIGGER before_update_return_date
+BEFORE UPDATE ON Borrowed_Books
+FOR EACH ROW
+BEGIN
+    DECLARE late_days INT;
+    DECLARE daily_fee DECIMAL(5, 2);
+
+    SET daily_fee = 5.00; 
+
+    IF NEW.Return_Date IS NOT NULL AND NEW.Return_Date > NEW.Due_Date THEN
+        SET late_days = DATEDIFF(NEW.Return_Date, NEW.Due_Date);
+        SET NEW.Late_Fee = late_days * daily_fee;
+    ELSE
+        SET NEW.Late_Fee = 0.00;
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- 6. Prevent Deletion of Students if They Have Borrowed Books Not Returned
+DELIMITER $$
+
+CREATE TRIGGER before_delete_student
+BEFORE DELETE ON Student
+FOR EACH ROW
+BEGIN
+    DECLARE borrowed_books_count INT;
+
+    SELECT COUNT(*) INTO borrowed_books_count
+    FROM Borrowed_Books
+    WHERE Student_ID = OLD.Student_ID AND Return_Date IS NULL;
+
+    IF borrowed_books_count > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Student cannot be deleted as they have borrowed books not returned';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- 7. Auto-Assign Default Password to New Administrators
+DELIMITER $$
+
+CREATE TRIGGER before_insert_administrator
+BEFORE INSERT ON Administrator
+FOR EACH ROW
+BEGIN
+    SET NEW.Password = 'default_password_hash'; -- Replace with the hash of your default password
+END $$
+
+DELIMITER ;
+
+-- 8. Log Changes to the Administrator Table
+DELIMITER $$
+
+CREATE TABLE Administrator_Log (
+    Log_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Admin_ID INT,
+    Admin_Name VARCHAR(100),
+    Email VARCHAR(100),
+    Action ENUM('INSERT', 'UPDATE', 'DELETE'),
+    Change_Timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE TRIGGER after_insert_administrator
+AFTER INSERT ON Administrator
+FOR EACH ROW
+BEGIN
+    INSERT INTO Administrator_Log (Admin_ID, Admin_Name, Email, Action)
+    VALUES (NEW.Admin_ID, NEW.Admin_Name, NEW.Email, 'INSERT');
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE TRIGGER after_update_administrator
+AFTER UPDATE ON Administrator
+FOR EACH ROW
+BEGIN
+    INSERT INTO Administrator_Log (Admin_ID, Admin_Name, Email, Action)
+    VALUES (NEW.Admin_ID, NEW.Admin_Name, NEW.Email, 'UPDATE');
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE TRIGGER after_delete_administrator
+AFTER DELETE ON Administrator
+FOR EACH ROW
+BEGIN
+    INSERT INTO Administrator_Log (Admin_ID, Admin_Name, Email, Action)
+    VALUES (OLD.Admin_ID, OLD.Admin_Name, OLD.Email, 'DELETE');
+END $$
+
+DELIMITER ;
+
+
+
+-- 9. Exam max score
+DELIMITER //
+
+CREATE TRIGGER check_marks_obtained_before_insert
+BEFORE INSERT ON Exam_Scores
+FOR EACH ROW
+BEGIN
+    DECLARE max_marks INT;
+    
+    SELECT Max_Marks INTO max_marks
+    FROM Exams
+    WHERE Exam_ID = NEW.Exam_ID;
+    
+    -- Check if Marks_Obtained is greater than Max_Marks
+    IF NEW.Marks_Obtained > max_marks THEN
+        SET MESSAGE_TEXT = 'Marks obtained cannot be greater than Max_Marks for this exam';
+    END IF;
+END //
+
+DELIMITER ;
